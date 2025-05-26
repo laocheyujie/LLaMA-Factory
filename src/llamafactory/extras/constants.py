@@ -91,6 +91,7 @@ SUPPORTED_CLASS_FOR_BLOCK_DIAG_ATTN = {
     "phi",
     "phi3",
     "qwen2",
+    "qwen3",
     "starcoder2",
 }
 

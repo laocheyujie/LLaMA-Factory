@@ -5,8 +5,8 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/hiyouga/LLaMA-Factory?color=orange)](https://github.com/hiyouga/LLaMA-Factory/graphs/contributors)
 [![GitHub workflow](https://github.com/hiyouga/LLaMA-Factory/actions/workflows/tests.yml/badge.svg)](https://github.com/hiyouga/LLaMA-Factory/actions/workflows/tests.yml)
 [![PyPI](https://img.shields.io/pypi/v/llamafactory)](https://pypi.org/project/llamafactory/)
-[![Citation](https://img.shields.io/badge/citation-476-green)](https://scholar.google.com/scholar?cites=12620864006390196564)
-[![GitHub pull request](https://img.shields.io/badge/PRs-welcome-blue)](https://github.com/hiyouga/LLaMA-Factory/pulls)
+[![Citation](https://img.shields.io/badge/citation-561-green)](https://scholar.google.com/scholar?cites=12620864006390196564)
+[![Docker Pulls](https://img.shields.io/docker/pulls/hiyouga/llamafactory)](https://hub.docker.com/r/hiyouga/llamafactory/tags)
 
 [![Twitter](https://img.shields.io/twitter/follow/llamafactory_ai)](https://twitter.com/llamafactory_ai)
 [![Discord](https://dcbadge.vercel.app/api/server/rKfvV9r9FK?compact=true&style=flat)](https://discord.gg/rKfvV9r9FK)
@@ -14,9 +14,10 @@
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1eRTPn37ltBbYsISy9Aw2NuI2Aq5CQrD9?usp=sharing)
 [![Open in DSW](https://gallery.pai-ml.com/assets/open-in-dsw.svg)](https://gallery.pai-ml.com/#/preview/deepLearning/nlp/llama_factory)
-[![Spaces](https://img.shields.io/badge/🤗-Open%20in%20Spaces-blue)](https://huggingface.co/spaces/hiyouga/LLaMA-Board)
-[![Studios](https://img.shields.io/badge/ModelScope-Open%20in%20Studios-blue)](https://modelscope.cn/studios/hiyouga/LLaMA-Board)
-[![SageMaker](https://img.shields.io/badge/SageMaker-Open%20in%20AWS-blue)](https://aws.amazon.com/cn/blogs/machine-learning/how-apoidea-group-enhances-visual-information-extraction-from-banking-documents-with-multimodal-models-using-llama-factory-on-amazon-sagemaker-hyperpod/)
+[![Open in Alaya](assets/alaya_new.svg)](https://docs.alayanew.com/docs/documents/newActivities/llamafactory/?utm_source=LLaMA-Factory)
+[![Open in Spaces](https://img.shields.io/badge/🤗-Open%20in%20Spaces-blue)](https://huggingface.co/spaces/hiyouga/LLaMA-Board)
+[![Open in Studios](https://img.shields.io/badge/ModelScope-Open%20in%20Studios-blue)](https://modelscope.cn/studios/hiyouga/LLaMA-Board)
+[![Open in Novita](https://img.shields.io/badge/Novita-Deploy%20Template-blue)](https://novita.ai/templates-library/105981?sharer=88115474-394e-4bda-968e-b88e123d0c47)
 
 ### Used by [Amazon](https://aws.amazon.com/cn/blogs/machine-learning/how-apoidea-group-enhances-visual-information-extraction-from-banking-documents-with-multimodal-models-using-llama-factory-on-amazon-sagemaker-hyperpod/), [NVIDIA](https://developer.nvidia.com/rtx/ai-toolkit), [Aliyun](https://help.aliyun.com/zh/pai/use-cases/fine-tune-a-llama-3-model-with-llama-factory), etc.
 
@@ -40,7 +41,7 @@
 
 </div>
 
-👋 Join our [WeChat](assets/wechat.jpg) or [NPU user group](assets/wechat_npu.jpg).
+👋 Join our [WeChat group](assets/wechat.jpg), [NPU user group](assets/wechat_npu.jpg) or [Alaya NeW user group](assets/wechat_alaya.png).
 
 \[ English | [中文](README_zh.md) \]
 
@@ -54,6 +55,7 @@ Choose your path:
 - **Colab (free)**: https://colab.research.google.com/drive/1eRTPn37ltBbYsISy9Aw2NuI2Aq5CQrD9?usp=sharing
 - **Local machine**: Please refer to [usage](#getting-started)
 - **PAI-DSW (free trial)**: https://gallery.pai-ml.com/#/preview/deepLearning/nlp/llama_factory
+- **Alaya NeW (cloud GPU deal)**: https://docs.alayanew.com/docs/documents/newActivities/llamafactory/?utm_source=LLaMA-Factory
 
 > [!NOTE]
 > Except for the above links, all other websites are unauthorized third-party websites. Please carefully use them.
@@ -103,12 +105,13 @@ Choose your path:
 
 ## Blogs
 
+- [Fine-tune Qwen2.5-VL for Autonomous Driving using LLaMA-Factory](https://docs.alayanew.com/docs/documents/useGuide/LLaMAFactory/mutiple/?utm_source=LLaMA-Factory) (Chinese)
 - [How Apoidea Group enhances visual information extraction from banking documents with multimodal models using LLaMA-Factory on Amazon SageMaker HyperPod](https://aws.amazon.com/cn/blogs/machine-learning/how-apoidea-group-enhances-visual-information-extraction-from-banking-documents-with-multimodal-models-using-llama-factory-on-amazon-sagemaker-hyperpod/) (English)
 - [Easy Dataset × LLaMA Factory: Enabling LLMs to Efficiently Learn Domain Knowledge](https://buaa-act.feishu.cn/wiki/GVzlwYcRFiR8OLkHbL6cQpYin7g) (English)
-- [LLaMA Factory: Fine-tuning the DeepSeek-R1-Distill-Qwen-7B Model for News Classifier](https://gallery.pai-ml.com/#/preview/deepLearning/nlp/llama_factory_deepseek_r1_distill_7b) (Chinese)
 
 <details><summary>All Blogs</summary>
 
+- [LLaMA Factory: Fine-tuning the DeepSeek-R1-Distill-Qwen-7B Model for News Classifier](https://gallery.pai-ml.com/#/preview/deepLearning/nlp/llama_factory_deepseek_r1_distill_7b) (Chinese)
 - [A One-Stop Code-Free Model Fine-Tuning \& Deployment Platform based on SageMaker and LLaMA-Factory](https://aws.amazon.com/cn/blogs/china/a-one-stop-code-free-model-fine-tuning-deployment-platform-based-on-sagemaker-and-llama-factory/) (Chinese)
 - [LLaMA Factory Multi-Modal Fine-Tuning Practice: Fine-Tuning Qwen2-VL for Personal Tourist Guide](https://gallery.pai-ml.com/#/preview/deepLearning/nlp/llama_factory_qwen2vl) (Chinese)
 - [LLaMA Factory: Fine-tuning the LLaMA3 Model for Role-Playing](https://gallery.pai-ml.com/#/preview/deepLearning/nlp/llama_factory) (Chinese)
@@ -277,7 +280,7 @@ Choose your path:
 | [LLaVA-NeXT](https://huggingface.co/llava-hf)                     | 7B/8B/13B/34B/72B/110B           | llava_next          |
 | [LLaVA-NeXT-Video](https://huggingface.co/llava-hf)               | 7B/34B                           | llava_next_video    |
 | [MiMo](https://huggingface.co/XiaomiMiMo)                         | 7B                               | mimo                |
-| [MiniCPM](https://huggingface.co/openbmb)                         | 1B/2B/4B                         | cpm/cpm3            |
+| [MiniCPM](https://huggingface.co/openbmb)                         | 0.5B/1B/2B/4B/8B                 | cpm/cpm3/cpm4       |
 | [MiniCPM-o-2.6/MiniCPM-V-2.6](https://huggingface.co/openbmb)     | 8B                               | minicpm_o/minicpm_v |
 | [Ministral/Mistral-Nemo](https://huggingface.co/mistralai)        | 8B/12B                           | ministral           |
 | [Mistral/Mixtral](https://huggingface.co/mistralai)               | 7B/8x7B/8x22B                    | mistral             |
@@ -414,7 +417,7 @@ You also can add a custom chat template to [template.py](src/llamafactory/data/t
 
 - [DPO mixed (en&zh)](https://huggingface.co/datasets/hiyouga/DPO-En-Zh-20k)
 - [UltraFeedback (en)](https://huggingface.co/datasets/HuggingFaceH4/ultrafeedback_binarized)
-- [COIG-P (en&zh)](https://huggingface.co/datasets/m-a-p/COIG-P)
+- [COIG-P (zh)](https://huggingface.co/datasets/m-a-p/COIG-P)
 - [RLHF-V (en)](https://huggingface.co/datasets/openbmb/RLHF-V-Dataset)
 - [VLFeedback (en)](https://huggingface.co/datasets/Zhihui/VLFeedback)
 - [RLAIF-V (en)](https://huggingface.co/datasets/openbmb/RLAIF-V-Dataset)
@@ -474,16 +477,27 @@ huggingface-cli login
 > [!IMPORTANT]
 > Installation is mandatory.
 
+#### Install from Source
+
 ```bash
 git clone --depth 1 https://github.com/hiyouga/LLaMA-Factory.git
 cd LLaMA-Factory
 pip install -e ".[torch,metrics]" --no-build-isolation
 ```
 
-Extra dependencies available: torch, torch-npu, metrics, deepspeed, liger-kernel, bitsandbytes, hqq, eetq, gptq, aqlm, vllm, sglang, galore, apollo, badam, adam-mini, qwen, minicpm_v, modelscope, openmind, swanlab, quality
+Extra dependencies available: torch, torch-npu, metrics, deepspeed, liger-kernel, bitsandbytes, hqq, eetq, gptq, aqlm, vllm, sglang, galore, apollo, badam, adam-mini, qwen, minicpm_v, modelscope, openmind, swanlab, dev
 
-> [!TIP]
-> Use `pip install -e . --no-deps --no-build-isolation` to resolve package conflicts.
+#### Install from Docker Image
+
+```bash
+docker run -it --rm --gpus=all --ipc=host hiyouga/llamafactory:latest
+```
+
+This image is built on Ubuntu 22.04 (x86\_64), CUDA 12.4, Python 3.11, PyTorch 2.6.0, and Flash-attn 2.7.4.
+
+Find the pre-built images: https://hub.docker.com/r/hiyouga/llamafactory/tags
+
+Please refer to [build docker](#build-docker) to build the image yourself.
 
 <details><summary>Setting up a virtual environment with <b>uv</b></summary>
 
@@ -663,22 +677,13 @@ For CUDA users:
 
 ```bash
 docker build -f ./docker/docker-cuda/Dockerfile \
-    --build-arg INSTALL_BNB=false \
-    --build-arg INSTALL_VLLM=false \
-    --build-arg INSTALL_DEEPSPEED=false \
-    --build-arg INSTALL_FLASHATTN=false \
     --build-arg PIP_INDEX=https://pypi.org/simple \
+    --build-arg EXTRAS=metrics \
     -t llamafactory:latest .
 
-docker run -dit --gpus=all \
-    -v ./hf_cache:/root/.cache/huggingface \
-    -v ./ms_cache:/root/.cache/modelscope \
-    -v ./om_cache:/root/.cache/openmind \
-    -v ./data:/app/data \
-    -v ./output:/app/output \
+docker run -dit --ipc=host --gpus=all \
     -p 7860:7860 \
     -p 8000:8000 \
-    --shm-size 16G \
     --name llamafactory \
     llamafactory:latest
 
@@ -688,19 +693,12 @@ docker exec -it llamafactory bash
 For Ascend NPU users:
 
 ```bash
-# Choose docker image upon your environment
 docker build -f ./docker/docker-npu/Dockerfile \
-    --build-arg INSTALL_DEEPSPEED=false \
     --build-arg PIP_INDEX=https://pypi.org/simple \
+    --build-arg EXTRAS=torch-npu,metrics \
     -t llamafactory:latest .
 
-# Change `device` upon your resources
-docker run -dit \
-    -v ./hf_cache:/root/.cache/huggingface \
-    -v ./ms_cache:/root/.cache/modelscope \
-    -v ./om_cache:/root/.cache/openmind \
-    -v ./data:/app/data \
-    -v ./output:/app/output \
+docker run -dit --ipc=host \
     -v /usr/local/dcmi:/usr/local/dcmi \
     -v /usr/local/bin/npu-smi:/usr/local/bin/npu-smi \
     -v /usr/local/Ascend/driver:/usr/local/Ascend/driver \
@@ -711,7 +709,6 @@ docker run -dit \
     --device /dev/davinci_manager \
     --device /dev/devmm_svm \
     --device /dev/hisi_hdc \
-    --shm-size 16G \
     --name llamafactory \
     llamafactory:latest
 
@@ -722,25 +719,15 @@ For AMD ROCm users:
 
 ```bash
 docker build -f ./docker/docker-rocm/Dockerfile \
-    --build-arg INSTALL_BNB=false \
-    --build-arg INSTALL_VLLM=false \
-    --build-arg INSTALL_DEEPSPEED=false \
-    --build-arg INSTALL_FLASHATTN=false \
     --build-arg PIP_INDEX=https://pypi.org/simple \
+    --build-arg EXTRAS=metrics \
     -t llamafactory:latest .
 
-docker run -dit \
-    -v ./hf_cache:/root/.cache/huggingface \
-    -v ./ms_cache:/root/.cache/modelscope \
-    -v ./om_cache:/root/.cache/openmind \
-    -v ./data:/app/data \
-    -v ./output:/app/output \
-    -v ./saves:/app/saves \
+docker run -dit --ipc=host \
     -p 7860:7860 \
     -p 8000:8000 \
     --device /dev/kfd \
     --device /dev/dri \
-    --shm-size 16G \
     --name llamafactory \
     llamafactory:latest
 
@@ -749,12 +736,14 @@ docker exec -it llamafactory bash
 
 </details>
 
-<details><summary>Details about volume</summary>
+<details><summary>Use Docker volumes</summary>
 
-- `hf_cache`: Utilize Hugging Face cache on the host machine. Reassignable if a cache already exists in a different directory.
-- `ms_cache`: Similar to Hugging Face cache but for ModelScope users.
-- `om_cache`: Similar to Hugging Face cache but for Modelers users.
-- `data`: Place datasets on this dir of the host machine so that they can be selected on LLaMA Board GUI.
+You can uncomment `VOLUME [ "/root/.cache/huggingface", "/app/shared_data", "/app/output" ]` in the Dockerfile to use data volumes.
+
+When building the Docker image, use `-v ./hf_cache:/root/.cache/huggingface` argument to mount the local directory to the container. The following data volumes are available.
+
+- `hf_cache`: Utilize Hugging Face cache on the host machine.
+- `shared_data`: The directionary to store datasets on the host machine.
 - `output`: Set export dir to this location so that the merged result can be accessed directly on the host machine.
 
 </details>
@@ -904,6 +893,7 @@ If you have a project that should be incorporated, please contact via email or c
 1. Xia et al. Using Pre-trained Language Model for Accurate ESG Prediction. FinNLP 2024. [[paper]](https://aclanthology.org/2024.finnlp-2.1/)
 1. Liang et al. I-SHEEP: Self-Alignment of LLM from Scratch through an Iterative Self-Enhancement Paradigm. 2024. [[arxiv]](https://arxiv.org/abs/2408.08072)
 1. Bai et al. Aligning Large Language Model with Direct Multi-Preference Optimization for Recommendation. CIKM 2024. [[paper]](https://dl.acm.org/doi/10.1145/3627673.3679611)
+1. Zhang et al. CPsyCoun: A Report-based Multi-turn Dialogue Reconstruction and Evaluation Framework for Chinese Psychological Counseling. ACL 2024. [[paper]](https://aclanthology.org/2024.findings-acl.830.pdf)
 1. **[StarWhisper](https://github.com/Yu-Yang-Li/StarWhisper)**: A large language model for Astronomy, based on ChatGLM2-6B and Qwen-14B.
 1. **[DISC-LawLLM](https://github.com/FudanDISC/DISC-LawLLM)**: A large language model specialized in Chinese legal domain, based on Baichuan-13B, is capable of retrieving and reasoning on legal knowledge.
 1. **[Sunsimiao](https://github.com/X-D-Lab/Sunsimiao)**: A large language model specialized in Chinese medical domain, based on Baichuan-7B and ChatGLM-6B.
@@ -918,7 +908,7 @@ If you have a project that should be incorporated, please contact via email or c
 1. **[360-LLaMA-Factory](https://github.com/Qihoo360/360-LLaMA-Factory)**: A modified library that supports long sequence SFT & DPO using ring attention.
 1. **[Sky-T1](https://novasky-ai.github.io/posts/sky-t1/)**: An o1-like model fine-tuned by NovaSky AI with very small cost.
 1. **[WeClone](https://github.com/xming521/WeClone)**: One-stop solution for creating your digital avatar from chat logs.
-
+1. **[EmoLLM](https://github.com/SmartFlowAI/EmoLLM)**: A project about large language models (LLMs) and mental health.
 </details>
 
 ## License

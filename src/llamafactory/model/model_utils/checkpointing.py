@@ -51,6 +51,8 @@ def get_unsloth_gradient_checkpointing_func() -> Callable:
             *args: Union["torch.Tensor", Any],
         ) -> "torch.Tensor":
             saved_hidden_states = hidden_states.to("cpu", non_blocking=True)
+            # NOTE: 禁用了 autograd 保存中间值（等于“激活不保存”）
+            # NOTE: with torch.no_grad(): 不记录操作、不保存中间值、不计算梯度
             with torch.no_grad():
                 outputs = forward_function(hidden_states, *args)
 
@@ -65,6 +67,7 @@ def get_unsloth_gradient_checkpointing_func() -> Callable:
             (hidden_states,) = ctx.saved_tensors
             hidden_states = hidden_states.to("cuda", non_blocking=True).detach()
             hidden_states.requires_grad_(True)
+            # NOTE: 打开梯度计算，以便计算梯度
             with torch.enable_grad():
                 outputs = ctx.forward_function(hidden_states, *ctx.args)
                 output = outputs[0] if isinstance(outputs, tuple) else outputs
@@ -80,20 +83,25 @@ def get_custom_gradient_checkpointing_func(gradient_checkpointing_func: Callable
 
     @wraps(gradient_checkpointing_func, assigned=WRAPPER_ASSIGNMENTS + ("__self__",))
     def custom_gradient_checkpointing_func(func: Callable, *args: Union["torch.Tensor", Any], **kwargs):
+        # NOTE: 获取模块实例
         if isinstance(func, partial):
             module: torch.nn.Module = func.func.__self__
         else:
             module: torch.nn.Module = func.__self__
 
+        # NOTE: 检查模块是否有需要梯度的参数
         has_grad = False
         if any(param.requires_grad for param in module.parameters()):
             has_grad = True
+            # NOTE: 确保第一个张量参数（通常是隐藏状态）需要梯度
             for arg in args:
                 if torch.is_tensor(arg) and torch.is_floating_point(arg):
                     arg.requires_grad_(True)
+                    # 只处理第一个浮点张量，因为通常这是隐藏状态
                     break  # assume the first tensor is always the hidden states
 
         if has_grad:
+            # NOTE: gradient_checkpointing_func 其实就是预填了一些参数的 checkpoint 函数
             return gradient_checkpointing_func(func, *args, **kwargs)
         else:
             return func(*args, **kwargs)
@@ -124,11 +132,14 @@ def _gradient_checkpointing_enable(
         gradient_checkpointing_func = partial(checkpoint, **gradient_checkpointing_kwargs)
 
     gradient_checkpointing_func = get_custom_gradient_checkpointing_func(gradient_checkpointing_func)
+    # NOTE: 检查模型使用的是新格式还是旧格式的梯度检查点
     if "value" in inspect.signature(self._set_gradient_checkpointing).parameters:  # old GC format
+        # NOTE: 对于旧格式，直接设置 value=True 并启用输入梯度
         self.apply(partial(self._set_gradient_checkpointing, value=True))
         self.enable_input_require_grads()
         logger.warning_rank0_once("You are using the old GC format, some features (e.g. BAdam) will be invalid.")
     else:  # have already enabled input require gradients
+        # NOTE:对于新格式，使用新的设置方式，传入自定义的梯度检查点函数
         self._set_gradient_checkpointing(enable=True, gradient_checkpointing_func=gradient_checkpointing_func)
 
 
@@ -158,10 +169,14 @@ def prepare_model_for_training(model: "PreTrainedModel", model_args: "ModelArgum
         else:
             # use_reentrant=False might increase VRAM usage (have not been empirically verified yet)
             # According to: https://github.com/huggingface/transformers/issues/28339
+            # NOTE: 使用partial创建一个新的函数，预设了use_unsloth_gc参数
             gradient_checkpointing_enable = partial(
                 _gradient_checkpointing_enable, use_unsloth_gc=model_args.use_unsloth_gc
             )
+            # NOTE: 将梯度检查点启用函数绑定到模型实例上，这样模型就可以直接调用gradient_checkpointing_enable方法
             model.gradient_checkpointing_enable = MethodType(gradient_checkpointing_enable, model)
+            # NOTE: 实际上就是用 _gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": model_args.use_reentrant_gc}, use_unsloth_gc=model_args.use_unsloth_gc)
+            # NOTE: use_reentrant 参数控制是否使用可重入的梯度检查点实现，use_reentrant=False可能会增加显存使用，但尚未得到经验验证
             model.gradient_checkpointing_enable(
                 gradient_checkpointing_kwargs={"use_reentrant": model_args.use_reentrant_gc}
             )

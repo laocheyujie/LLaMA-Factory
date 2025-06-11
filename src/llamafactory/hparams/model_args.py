@@ -65,6 +65,11 @@ class BaseModelArguments:
         default=False,
         metadata={"help": "Whether or not the special tokens should be split during the tokenization process."},
     )
+    # NOTE: 是否在 tokenization 过程中拆分特殊 token
+    # 输入文本: "[CLS] 你好世界"
+    # 当 split_special_tokens=False 时，输出文本: ["[CLS]", "你", "好", "世", "界"]
+    # 当 split_special_tokens=True 时，输出文本: ["[", "CLS", "]", "你", "好", "世", "界"]
+    # 大多数情况下我们都会保持默认值 False
     add_tokens: Optional[str] = field(
         default=None,
         metadata={
@@ -177,6 +182,7 @@ class BaseModelArguments:
             raise ValueError("Please provide `model_name_or_path`.")
 
         if self.split_special_tokens and self.use_fast_tokenizer:
+            # NOTE: split_special_tokens 只支持慢速 tokenizer
             raise ValueError("`split_special_tokens` is only supported for slow tokenizers.")
 
         if self.adapter_name_or_path is not None:  # support merging multiple lora weights

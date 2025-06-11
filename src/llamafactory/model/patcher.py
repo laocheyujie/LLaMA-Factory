@@ -48,25 +48,41 @@ logger = logging.get_logger(__name__)
 
 
 def patch_tokenizer(tokenizer: "PreTrainedTokenizer", model_args: "ModelArguments") -> None:
+    """
+    NOTE: 
+    1. 统一 pad 类型
+    2. 更新 model_max_length
+    3. 添加普通词元
+    4. 添加特殊词元
+    """
+
+    # NOTE: 对分词器（tokenizer）进行一些修改和增强
+    # NOTE: 如果 _pad 方法不是来自 PreTrainedTokenizerBase
+    # NOTE: 如果这个分词器没有使用标准的填充方法，我们就给它换上标准的填充方法
     if "PreTrainedTokenizerBase" not in str(tokenizer._pad.__func__):
+        # NOTE: 将 PreTrainedTokenizerBase 中的 _pad 方法绑定到当前的 tokenizer 实例上
         tokenizer._pad = MethodType(PreTrainedTokenizerBase._pad, tokenizer)
 
     if model_args.model_max_length is not None and tokenizer.model_max_length < model_args.model_max_length:
         tokenizer.model_max_length = model_args.model_max_length  # enlarge the tokenizer max length
 
     if model_args.add_tokens is not None:
+        # NOTE: 添加普通词元
         num_added_tokens = tokenizer.add_tokens(new_tokens=model_args.add_tokens, special_tokens=False)
         logger.info_rank0("Add tokens {} to tokenizer's vocabulary.".format(",".join(model_args.add_tokens)))
         if num_added_tokens > 0 and not model_args.resize_vocab:
+            # NOTE: 如果成功添加了新词元，自动将 resize_vocab 设置为 True，以确保模型能够使用这些新词元
             model_args.resize_vocab = True
             logger.warning_rank0("New tokens have been added, changed `resize_vocab` to True.")
 
     if model_args.add_special_tokens is not None:
+        # NOTE: 添加特殊词元
         num_added_special_tokens = tokenizer.add_tokens(new_tokens=model_args.add_special_tokens, special_tokens=True)
         logger.info_rank0(
             "Add special tokens {} to tokenizer's vocabulary.".format(",".join(model_args.add_special_tokens))
         )
         if num_added_special_tokens > 0 and not model_args.resize_vocab:
+            # NOTE: 如果成功添加了新特殊词元，自动将 resize_vocab 设置为 True，以确保模型能够使用这些新特殊词元
             model_args.resize_vocab = True
             logger.warning_rank0("New special tokens have been added, changed `resize_vocab` to True.")
 
@@ -76,16 +92,22 @@ def patch_processor(
     tokenizer: "PreTrainedTokenizer",
     model_args: "ModelArguments",
 ) -> None:
+    # NOTE: 配置多模态处理器（processor）的参数
+    # NOTE: 通过 setattr 函数为处理器设置各种属性
+    # NOTE: 统一配置多模态处理器的参数
     setattr(processor, "tokenizer", tokenizer)
+    # 图片
     setattr(processor, "image_max_pixels", model_args.image_max_pixels)
     setattr(processor, "image_min_pixels", model_args.image_min_pixels)
     setattr(processor, "image_do_pan_and_scan", model_args.image_do_pan_and_scan)
     setattr(processor, "crop_to_patches", model_args.crop_to_patches)
+    # 视频
     setattr(processor, "video_max_pixels", model_args.video_max_pixels)
     setattr(processor, "video_min_pixels", model_args.video_min_pixels)
     setattr(processor, "video_fps", model_args.video_fps)
     setattr(processor, "video_maxlen", model_args.video_maxlen)
     setattr(processor, "use_audio_in_video", model_args.use_audio_in_video)
+    # 音频
     setattr(processor, "audio_sampling_rate", model_args.audio_sampling_rate)
 
 

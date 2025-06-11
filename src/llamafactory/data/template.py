@@ -587,8 +587,10 @@ def parse_template(tokenizer: "PreTrainedTokenizer") -> "Template":
 def get_template_and_fix_tokenizer(tokenizer: "PreTrainedTokenizer", data_args: "DataArguments") -> "Template":
     r"""Get chat template and fixes the tokenizer."""
     if data_args.template is None:
+        # NOTE: 如果 template 参数没有指定，则尝试用 tokenizer 中的 chat_template
         if isinstance(tokenizer.chat_template, str):
             logger.warning_rank0("`template` was not specified, try parsing the chat template from the tokenizer.")
+            # NOTE: 返回 Template 实例
             template = parse_template(tokenizer)
         else:
             logger.warning_rank0("`template` was not specified, use `empty` template.")
@@ -600,15 +602,21 @@ def get_template_and_fix_tokenizer(tokenizer: "PreTrainedTokenizer", data_args: 
         template = TEMPLATES[data_args.template]
 
     if data_args.train_on_prompt and template.efficient_eos:
+        # NOTE: train_on_prompt 表示是否在提示词（prompt）部分也进行训练
+        # NOTE: efficient_eos 表示是否使用高效的结束标记（End of Sequence, EOS）处理
+        # NOTE: 如果启用了高效 EOS 处理，则不能在提示词部分也进行训练
         raise ValueError("Current template does not support `train_on_prompt`.")
 
     if data_args.tool_format is not None:
+        # NOTE: 1. 构建工具调用提示词
         logger.info_rank0(f"Using tool format: {data_args.tool_format}.")
         default_slots = ["{{content}}"] if template.efficient_eos else ["{{content}}", {"eos_token"}]
+        # NOTE: template.format_function 是填充好内容的 SLOTS
         template.format_function = FunctionFormatter(slots=default_slots, tool_format=data_args.tool_format)
         template.format_tools = ToolFormatter(tool_format=data_args.tool_format)
 
     if data_args.default_system is not None:
+        # NOTE: 2. 设置默认系统提示词
         logger.info_rank0(f"Using default system message: {data_args.default_system}.")
         template.default_system = data_args.default_system
 

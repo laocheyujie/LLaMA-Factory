@@ -45,6 +45,8 @@ def run_pt(
     template = get_template_and_fix_tokenizer(tokenizer, data_args)
     dataset_module = get_dataset(template, model_args, data_args, training_args, stage="pt", **tokenizer_module)
     model = load_model(tokenizer, model_args, finetuning_args, training_args.do_train)
+    # NOTE: -100 表示当前位置不参与损失计算，mlm=False表示不使用掩码语言模型，padding token位置设置为-100；mlm=True表示使用掩码语言模型，non-masked token位置设置为-100，只计算masked token的损失
+    # NOTE: cross-entropy loss 默认忽略 -100
     data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
     # Initialize our Trainer

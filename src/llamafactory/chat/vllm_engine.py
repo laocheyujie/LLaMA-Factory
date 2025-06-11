@@ -60,14 +60,17 @@ class VllmEngine(BaseEngine):
                 model_args.infer_dtype = "float16"
 
         self.can_generate = finetuning_args.stage == "sft"
+        # NOTE: vllm 获取 tokenizer 和 processor
         tokenizer_module = load_tokenizer(model_args)
         self.tokenizer = tokenizer_module["tokenizer"]
         self.processor = tokenizer_module["processor"]
-        self.tokenizer.padding_side = "left"
+        self.tokenizer.padding_side = "left"  # NOTE: vllm 设置分词器的填充方向为 left
+        # NOTE: vllm 获取 template
         self.template = get_template_and_fix_tokenizer(self.tokenizer, data_args)
         self.template.mm_plugin.expand_mm_tokens = False  # for vllm generate
         self.generating_args = generating_args.to_dict()
 
+        # NOTE: vllm 关键配置
         engine_args = {
             "model": model_args.model_name_or_path,
             "trust_remote_code": model_args.trust_remote_code,
@@ -94,7 +97,9 @@ class VllmEngine(BaseEngine):
             logger.info_rank0("Detected Yi-VL model, applying projector patch.")
             vllm.model_executor.models.llava.LlavaMultiModalProjector = LlavaMultiModalProjectorForYiVLForVLLM
 
+        # NOTE: vllm 创建 model
         self.model = AsyncLLMEngine.from_engine_args(AsyncEngineArgs(**engine_args))
+        # NOTE: vllm 创建 LoRA
         if model_args.adapter_name_or_path is not None:
             self.lora_request = LoRARequest("default", 1, model_args.adapter_name_or_path[0])
         else:
@@ -112,6 +117,8 @@ class VllmEngine(BaseEngine):
     ) -> AsyncIterator["RequestOutput"]:
         request_id = f"chatcmpl-{uuid.uuid4().hex}"
         if images is not None and not any(IMAGE_PLACEHOLDER in message["content"] for message in messages):
+            # NOTE: 存在图片内容
+            # <image><image>...<image>XXX
             messages[0]["content"] = IMAGE_PLACEHOLDER * len(images) + messages[0]["content"]
 
         if videos is not None and not any(VIDEO_PLACEHOLDER in message["content"] for message in messages):

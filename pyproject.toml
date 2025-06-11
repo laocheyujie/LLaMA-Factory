@@ -101,3 +101,7 @@ conflicts = [
         { extra = "minicpm_v" },
     ],
 ]
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true

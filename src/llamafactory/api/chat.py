@@ -112,6 +112,8 @@ def _process_request(
             input_messages.append({"role": ROLE_MAPPING[Role.FUNCTION], "content": content})
         elif isinstance(message.content, list):
             text_content = ""
+            # NOTE: 处理多模态输入
+            # 把 text 和 image, video, audio 都转换为对应的占位符并在相应的 list 里添加他们的二进制内容
             for input_item in message.content:
                 if input_item.type == "text":
                     text_content += input_item.text
@@ -159,6 +161,7 @@ def _process_request(
 
     tool_list = request.tools
     if isinstance(tool_list, list) and len(tool_list):
+        # NOTE: 把请求中的 tools 转换为 json 字符串
         try:
             tools = json.dumps([dictify(tool.function) for tool in tool_list], ensure_ascii=False)
         except json.JSONDecodeError:

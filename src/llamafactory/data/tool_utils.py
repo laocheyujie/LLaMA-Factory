@@ -161,11 +161,13 @@ class GLM4ToolUtils(ToolUtils):
                 name=tool["name"], body=json.dumps(tool, indent=4, ensure_ascii=False)
             )
 
+        # NOTE: 放到系统提示词中
         return GLM4_TOOL_PROMPT.format(tool_text=tool_text)
 
     @override
     @staticmethod
     def function_formatter(functions: list["FunctionCall"]) -> str:
+        # NOTE: 把 tools 里的内容拼接组装成 tool_text
         if len(functions) > 1:
             raise ValueError("GLM-4 does not support parallel functions.")
 
@@ -174,6 +176,7 @@ class GLM4ToolUtils(ToolUtils):
     @override
     @staticmethod
     def tool_extractor(content: str) -> Union[str, list["FunctionCall"]]:
+        # NOTE: 将 function_call 的结果分别提取出 name 和 arguments
         if "\n" not in content:
             return content
 
@@ -303,6 +306,7 @@ class QwenToolUtils(ToolUtils):
         return results
 
 
+# NOTE: 工具调用模板
 TOOLS = {
     "default": DefaultToolUtils(),
     "glm4": GLM4ToolUtils(),

@@ -40,13 +40,16 @@ class SupervisedDatasetProcessor(DatasetProcessor):
         videos: list["VideoInput"],
         audios: list["AudioInput"],
     ) -> tuple[list[int], list[int]]:
+        # NOTE: 把多模态输入的占位符转换成对用的 special tokens
         messages = self.template.mm_plugin.process_messages(prompt + response, images, videos, audios, self.processor)
         input_ids, labels = self.template.mm_plugin.process_token_ids(
             [], [], images, videos, audios, self.tokenizer, self.processor
         )
+        # NOTE: encode_multiturn 返回的就是tokenize后的ids
         encoded_pairs = self.template.encode_multiturn(self.tokenizer, messages, system, tools)
         total_length = len(input_ids) + (1 if self.template.efficient_eos else 0)
         if self.data_args.mask_history:
+            # NOTE: 首先反转历史对话，最后一轮对话会被优先处理
             encoded_pairs = encoded_pairs[::-1]  # high priority for last turns
 
         for turn_idx, (source_ids, target_ids) in enumerate(encoded_pairs):
@@ -68,6 +71,7 @@ class SupervisedDatasetProcessor(DatasetProcessor):
                 source_label = [IGNORE_INDEX] * source_len
 
             if self.data_args.mask_history and turn_idx != 0:  # train on the last turn only
+                # NOTE: 历史对话虽然会被保留在输入中，但不会参与损失计算
                 target_label = [IGNORE_INDEX] * target_len
             else:
                 target_label = target_ids

@@ -60,7 +60,7 @@ def resize_embedding_layer(model: "PreTrainedModel", tokenizer: "PreTrainedToken
         if not isinstance(model.get_output_embeddings(), torch.nn.Linear):
             raise ValueError("Current model does not support resizing embedding layers.")
 
-        model.resize_token_embeddings(len(tokenizer), pad_to_multiple_of=64)
+        model.resize_token_embeddings(len(tokenizer), pad_to_multiple_of=64) # NOTE: 填充到 64 的倍数
         with context_maybe_zero3:
             new_embedding_size = model.get_input_embeddings().weight.size(0)
             num_new_tokens = new_embedding_size - current_embedding_size

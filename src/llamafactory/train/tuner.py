@@ -82,10 +82,12 @@ def _training_function(config: dict[str, Any]) -> None:
         raise ValueError(f"Unknown task: {finetuning_args.stage}.")
 
     if is_ray_available() and ray.is_initialized():
+        # NOTE: 如果 Ray 已经初始化，就直接返回，因为 Ray 会在返回时自动销毁进程组
         return  # if ray is intialized it will destroy the process group on return
 
     try:
         if dist.is_initialized():
+            # NOTE: 如果已初始化 PyTorch 分布式环境，就销毁进程组
             dist.destroy_process_group()
     except Exception as e:
         logger.warning(f"Failed to destroy process group: {e}.")
@@ -196,3 +198,7 @@ def export_model(args: Optional[dict[str, Any]] = None) -> None:
     with open(ollama_modelfile, "w", encoding="utf-8") as f:
         f.write(template.get_ollama_modelfile(tokenizer))
         logger.info_rank0(f"Ollama modelfile saved in {ollama_modelfile}")
+
+
+if __name__ == "__main__":
+    run_exp()

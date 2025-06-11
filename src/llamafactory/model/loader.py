@@ -63,6 +63,7 @@ def _get_init_kwargs(model_args: "ModelArguments") -> dict[str, Any]:
     Note: including inplace operation of model_args.
     """
     skip_check_imports()
+    # NOTE: 下载模型并返回下载后的路径
     model_args.model_name_or_path = try_download_model_from_other_hub(model_args)
     return {
         "trust_remote_code": model_args.trust_remote_code,
@@ -107,6 +108,7 @@ def load_tokenizer(model_args: "ModelArguments") -> "TokenizerModule":
     # Avoid load tokenizer, see:
     # https://github.com/huggingface/transformers/blob/v4.40.0/src/transformers/models/auto/processing_auto.py#L324
     if processor is not None and "Processor" not in processor.__class__.__name__:
+        # NOTE: 如果加载的处理器存在，但不是 Processor 的实例，则丢弃它
         logger.debug("The loaded processor is not an instance of Processor. Dropping it.")
         processor = None
 
@@ -115,7 +117,9 @@ def load_tokenizer(model_args: "ModelArguments") -> "TokenizerModule":
 
 def load_config(model_args: "ModelArguments") -> "PretrainedConfig":
     r"""Load model config."""
+    # NOTE: 下载模型并返回下载后的模型基础配置
     init_kwargs = _get_init_kwargs(model_args)
+    # NOTE: 加载模型基础配置
     return AutoConfig.from_pretrained(model_args.model_name_or_path, **init_kwargs)
 
 

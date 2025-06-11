@@ -180,7 +180,12 @@ def _setup_lora_tuning(
         }
 
         for adapter in adapter_to_merge:
+            # NOTE: 将多个 LoRA 适配器的效果合并到一个模型中
+            # model: 基础模型，adapter: 要加载的适配器名称或路径
+            # 返回一个 LoraModel 类型的模型，这是加载了 LoRA 适配器后的模型
             model: LoraModel = PeftModel.from_pretrained(model, adapter, **init_kwargs)
+            # NOTE: 将 LoRA 适配器的权重合并到基础模型中，合并后的权重直接更新到基础模型中
+            # unload: 移除 LoRA 适配器，释放适配器占用的内存，模型回到普通状态，不再包含 LoRA 结构
             model = model.merge_and_unload()
 
         if len(adapter_to_merge) > 0:

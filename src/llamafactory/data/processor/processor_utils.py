@@ -75,6 +75,7 @@ def greedy_knapsack(numbers: list[int], capacity: int) -> list[list[int]]:
 
 def infer_seqlen(source_len: int, target_len: int, cutoff_len: int) -> tuple[int, int]:
     r"""Compute the real sequence length after truncation by the cutoff_len."""
+    # NOTE: 通过智能地分配长度限制，尽量保持源序列和目标序列的相对比例，同时确保总长度不超过限制
     if target_len * 2 < cutoff_len:  # truncate source
         max_target_len = cutoff_len
     elif source_len * 2 < cutoff_len:  # truncate target

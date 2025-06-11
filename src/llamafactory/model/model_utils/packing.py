@@ -81,6 +81,11 @@ def get_seqlens_in_batch(attention_mask: "torch.Tensor") -> "torch.Tensor":
 def get_unpad_data(attention_mask: "torch.Tensor") -> tuple["torch.Tensor", "torch.Tensor", int]:
     r"""Prepare the indices and seqlens for flash attn varlen function.
 
+    NOTE: 
+    1. 帮助 Flash Attention 知道每个序列的实际长度
+    2. 允许模型只处理有效的token，跳过填充的token
+    3. 优化内存使用，因为不需要为填充token分配注意力计算资源
+
     Returns:
         indices: indices of non-masked tokens from the flattened sequence.
         cu_seqlens: the cumulative sequence lengths in the current batch, always starts from 0.
@@ -94,9 +99,9 @@ def get_unpad_data(attention_mask: "torch.Tensor") -> tuple["torch.Tensor", "tor
         [1, 2, 2, 3, 3, 3],
     ]
     # output
-    [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11]
-    [0, 2, 5, 6, 8, 11]
-    3
+    indices: [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11] 所有非零（非掩码）位置的索引
+    cu_seqlens: [0, 2, 5, 6, 8, 11] 累积序列长度，表示：第一个序列有2个1，第二个序列有3个2，第三个序列有1个3...
+    max_seqlen_in_batch: 3 当前批次中最长序列的长度
     ```
 
     """

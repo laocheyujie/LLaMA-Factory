@@ -54,15 +54,18 @@ if is_uvicorn_available():
 async def sweeper() -> None:
     while True:
         torch_gc()
+        # NOTE: 每隔5分钟进行一次 GPU 内存回收
         await asyncio.sleep(300)
 
 
 @asynccontextmanager
 async def lifespan(app: "FastAPI", chat_model: "ChatModel"):  # collects GPU memory
     if chat_model.engine.name == EngineName.HF:
+        # NOTE: 当使用 HuggingFace 引擎时，会创建一个后台任务来运行这个 sweeper 用于清理 GPU 内存
         asyncio.create_task(sweeper())
 
     yield
+    # NOTE: 在应用关闭时，进行一次 GPU 内存回收
     torch_gc()
 
 
@@ -80,6 +83,8 @@ def create_app(chat_model: "ChatModel") -> "FastAPI":
     security = HTTPBearer(auto_error=False)
 
     async def verify_api_key(auth: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)]):
+        # NOTE: 首先执行 Depends(security)，它会从请求头中提取 Bearer token
+        # 然后将提取到的 token 作为 auth 参数传递给 verify_api_key 函数
         if api_key and (auth is None or auth.credentials != api_key):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key.")
 

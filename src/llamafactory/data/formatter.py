@@ -71,6 +71,7 @@ class StringFormatter(Formatter):
 
     @override
     def apply(self, **kwargs) -> SLOTS:
+        # NOTE: 将 slots 中的字符串替换为 kwargs 中的值
         elements = []
         for slot in self.slots:
             if isinstance(slot, str):
@@ -92,6 +93,7 @@ class StringFormatter(Formatter):
 class FunctionFormatter(StringFormatter):
     def __post_init__(self):
         super().__post_init__()
+        # NOTE: 返回 tool_format 对应的实例
         self.tool_utils = get_tool_utils(self.tool_format)
 
     @override
@@ -120,6 +122,7 @@ class FunctionFormatter(StringFormatter):
         if thought:
             function_str = thought.group(0) + function_str
 
+        # NOTE: 返回替换了 tool_text 的 slots 列表
         return super().apply(content=function_str)
 
 

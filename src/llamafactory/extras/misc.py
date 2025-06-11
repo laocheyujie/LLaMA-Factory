@@ -136,6 +136,7 @@ def count_parameters(model: "torch.nn.Module") -> tuple[int, int]:
             else:
                 num_bytes = 1
 
+            # NOTE: 乘以2是因为4位量化需要额外的存储空间来存储量化参数
             num_params = num_params * 2 * num_bytes
 
         all_param += num_params
@@ -238,11 +239,13 @@ def numpify(inputs: Union["NDArray", "torch.Tensor"]) -> "NDArray":
 def skip_check_imports() -> None:
     r"""Avoid flash attention import error in custom model files."""
     if not is_env_enabled("FORCE_CHECK_IMPORTS"):
+        # NOTE: 跳过检查导入
         transformers.dynamic_module_utils.check_imports = get_relative_imports
 
 
 def torch_gc() -> None:
     r"""Collect the device memory."""
+    # NOTE: 回收 GPU 内存
     gc.collect()
     if is_torch_xpu_available():
         torch.xpu.empty_cache()

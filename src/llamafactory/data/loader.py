@@ -144,6 +144,7 @@ def _load_single_dataset(
             dataset = dataset.to_iterable_dataset(num_shards=training_args.dataloader_num_workers)
 
     if dataset_attr.num_samples is not None and not data_args.streaming:
+        # NOTE: 让样本数等于dataset_attr.num_samples，少了就随机采样，多了就随机丢弃
         target_num = dataset_attr.num_samples
         indexes = np.random.permutation(len(dataset))[:target_num]  # all samples should be included
         target_num -= len(indexes)
@@ -300,6 +301,8 @@ def get_dataset(
             raise ValueError("Turn off `streaming` when saving dataset to disk.")
 
     # Load and preprocess dataset
+    # NOTE: 在分布式训练中，通常会有多个进程同时运行（比如多个GPU上的训练进程）
+    # 这行代码确保只有主进程（通常是rank 0的进程）会执行数据集加载操作
     with training_args.main_process_first(desc="load dataset"):
         dataset = _get_merged_dataset(data_args.dataset, model_args, data_args, training_args, stage)
         eval_dataset = _get_merged_dataset(

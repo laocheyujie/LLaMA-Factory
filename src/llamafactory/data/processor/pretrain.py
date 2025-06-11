@@ -38,6 +38,7 @@ class PretrainDatasetProcessor(DatasetProcessor):
             )
         else:
             tokenized_examples = self.tokenizer(text_examples, add_special_tokens=False)
+            # NOTE: packing 就是把所有训练样本的token拼接到一起，然后按block_size切分
             concatenated_examples = {k: list(chain(*tokenized_examples[k])) for k in tokenized_examples.keys()}
             total_length = len(concatenated_examples[list(concatenated_examples.keys())[0]])
             block_size = self.data_args.cutoff_len
@@ -48,6 +49,8 @@ class PretrainDatasetProcessor(DatasetProcessor):
             }
             if getattr(self.tokenizer, "add_bos_token", False):
                 for i in range(len(result["input_ids"])):
+                    # BUG: 这里我感觉应该是在前面插入bos_token_id，而不是替换
+                    # result["input_ids"][i] = [self.tokenizer.bos_token_id] + result["input_ids"][i]
                     result["input_ids"][i][0] = self.tokenizer.bos_token_id
 
         return result

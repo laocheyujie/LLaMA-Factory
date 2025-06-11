@@ -115,6 +115,7 @@ class MultiModalDataCollatorForSeq2Seq(DataCollatorForSeq2Seq):
         ):  # avoid process hanging in zero3/fsdp case
             fake_messages = [{"role": "user", "content": IMAGE_PLACEHOLDER}]
             fake_images = [Image.new("RGB", (64, 64), (255, 255, 255))]
+            # NOTE: process_messages 把多模态占位符转换为 special token 包裹的 token，并组合成 messages
             fake_messages = self.template.mm_plugin.process_messages(
                 fake_messages, fake_images, [], [], self.processor
             )

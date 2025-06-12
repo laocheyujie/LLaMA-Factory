@@ -2,6 +2,15 @@
   "identity": {
     "file_name": "identity.json"
   },
+  "pt_demo": {
+    "file_name": "pt_demo.jsonl",
+    "columns": {
+      "prompt": "text"
+    }
+  },
+  "sft_demo": {
+    "file_name": "sft_demo.json"
+  },
   "alpaca_en_demo": {
     "file_name": "alpaca_en_demo.json"
   },

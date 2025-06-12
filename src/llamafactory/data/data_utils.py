@@ -106,6 +106,11 @@ def split_dataset(
         else:
             dataset_dict["train"] = dataset
 
+    # NOTE: dataset_dict
+    # {'train': Dataset({
+    #     features: ['input_ids', 'attention_mask'],
+    #     num_rows: 1
+    # })}
     if eval_dataset is not None:
         if isinstance(eval_dataset, dict):
             dataset_dict.update({f"validation_{name}": data for name, data in eval_dataset.items()})

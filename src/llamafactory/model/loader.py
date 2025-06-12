@@ -182,6 +182,7 @@ def load_model(
     model = init_adapter(config, model, model_args, finetuning_args, is_trainable)
 
     if add_valuehead:
+        # NOTE: 在语言模型的基础上添加一个额外的线性层 Value Head（价值头），用于输出一个标量 value，以便进行 RLHF（人类反馈强化学习）、DPO（直接偏好优化）、ORPO 等训练任务
         model = AutoModelForCausalLMWithValueHead.from_pretrained(model)
         patch_valuehead_model(model)
 

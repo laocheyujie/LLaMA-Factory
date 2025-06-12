@@ -276,6 +276,7 @@ def align_dataset(
         )
 
     dataset_converter = get_dataset_converter(dataset_attr.formatting, dataset_attr, data_args)
+    # NOTE: 做一次格式转换的批处理
     return dataset.map(
         dataset_converter,
         batched=False,

@@ -48,13 +48,10 @@ logger = logging.get_logger(__name__)
 
 
 def patch_tokenizer(tokenizer: "PreTrainedTokenizer", model_args: "ModelArguments") -> None:
-    """
-    NOTE: 
-    1. 统一 pad 类型
-    2. 更新 model_max_length
-    3. 添加普通词元
-    4. 添加特殊词元
-    """
+    # NOTE: 1. 统一 pad 类型
+    # NOTE: 2. 更新 model_max_length
+    # NOTE: 3. 添加普通词元
+    # NOTE: 4. 添加特殊词元
 
     # NOTE: 对分词器（tokenizer）进行一些修改和增强
     # NOTE: 如果 _pad 方法不是来自 PreTrainedTokenizerBase

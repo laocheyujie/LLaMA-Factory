@@ -160,6 +160,7 @@ def _load_single_dataset(
         max_samples = min(data_args.max_samples, len(dataset))
         dataset = dataset.select(range(max_samples))
 
+    # NOTE: 批量转换一下数据格式，统一成 _prompt, _response, _system, _tools, _images, _videos, _audios 的格式
     return align_dataset(dataset, dataset_attr, data_args, training_args)
 
 
@@ -182,6 +183,21 @@ def _get_merged_dataset(
 
         datasets[dataset_name] = _load_single_dataset(dataset_attr, model_args, data_args, training_args)
 
+    # NOTE: datasets
+    # {'pt_demo': Dataset({
+    #     features: ['_prompt', '_response', '_system', '_tools', '_images', '_videos', '_audios'],
+    #     num_rows: 2
+    # })}
+    # datasets['pt_demo'][0]
+    # {
+    #     '_prompt': [{'content': 'Don’t think you need all the bells and whistles? No problem. McKinley Heating Service...rns related to your HVAC system addressed.', 'role': 'user'}], 
+    #     '_response': [], 
+    #     '_system': '', 
+    #     '_tools': '', 
+    #     '_images': None, 
+    #     '_videos': None, 
+    #     '_audios': None
+    # }
     if return_dict:
         return datasets
     else:
@@ -261,6 +277,11 @@ def _get_preprocessed_dataset(
         remove_columns=column_names,
         **kwargs,
     )
+    # NOTE: dataset 打包后的数据格式一样，只是重组了一下内容，tokenize 后
+    # Dataset({
+    #     features: ['input_ids', 'attention_mask'],
+    #     num_rows: 1
+    # })
 
     if training_args.should_log:
         try:
@@ -313,6 +334,11 @@ def get_dataset(
             stage,
             return_dict=data_args.eval_on_each_dataset,
         )
+        # NOTE: dataset 此时还未 tokenize 
+        # Dataset({
+        #     features: ['_prompt', '_response', '_system', '_tools', '_images', '_videos', '_audios'],
+        #     num_rows: 2
+        # })
 
     with training_args.main_process_first(desc="pre-process dataset", local=(not data_args.data_shared_file_system)):
         dataset = _get_preprocessed_dataset(

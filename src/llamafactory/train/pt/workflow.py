@@ -44,6 +44,13 @@ def run_pt(
     tokenizer = tokenizer_module["tokenizer"]
     template = get_template_and_fix_tokenizer(tokenizer, data_args)
     dataset_module = get_dataset(template, model_args, data_args, training_args, stage="pt", **tokenizer_module)
+    # NOTE: dataset_module
+    # {'train_dataset': Dataset({
+    #     features: ['input_ids', 'attention_mask'],
+    #     num_rows: 1
+    # })}
+    # dataset_module['train_dataset'][0]['input_ids']
+    # [8002, 1405, 1744, 498, 1184, 678, 279, 60694, 323, 420, 65943, 30, 2308, 3491, 13, 66393, 8002, 1405, 1744, 498]
     model = load_model(tokenizer, model_args, finetuning_args, training_args.do_train)
     # NOTE: -100 表示当前位置不参与损失计算，mlm=False表示不使用掩码语言模型，padding token位置设置为-100；mlm=True表示使用掩码语言模型，non-masked token位置设置为-100，只计算masked token的损失
     # NOTE: cross-entropy loss 默认忽略 -100

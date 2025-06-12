@@ -17,6 +17,8 @@ torchrun 启动的是 launcher 脚本，launcher 又调用乐 train.tuner.run_ex
 - pt 就是把`text`直接tokenizer后得到`input_ids`用于自回归训练；sft 就是把`messages`按照`Template`转换后，`query`+`res`作为`input_ids`，`query`位置填充`-100`的`query`+`res`作为`label`，即把`query`不计算loss而已
 - Dataset负责加载和预处理原始数据，个样本会被转换成包含`input_ids`、`attention_mask`、`labels`等字段的字典；DataCollator负责将多个样本组合成一个batch
 - pt 的`PretrainDatasetProcessor`在最后加了eos，所以不用做shift
+- `Dataset`类型，取数方式是`dataset[i]['key']`，`dataset.map(func)`方法中的`func`的第一个参数是`features`，它的格式是`features[key]`每个`key`下面是所有数据的列表，用`features[key][i]`方式取
+- `PPO`的`value`和`policy`模型是同一个，只不过加了线性层`valuehead`来输出`value`分数
 
 
 ## train

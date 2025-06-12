@@ -160,7 +160,7 @@ cython_debug/
 .idea/
 
 # vscode
-.vscode/
+# .vscode/
 
 # uv
 uv.lock

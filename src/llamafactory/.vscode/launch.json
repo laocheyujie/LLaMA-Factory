@@ -52,6 +52,31 @@
             }
         },
         {
+            "name": "ppo",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/data/cheyujie/github_fork/LLaMA-Factory/.venv/bin/torchrun",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "--nnodes",
+                "1",
+                "--node_rank",
+                "0",
+                "--nproc-per-node",
+                "2",
+                "--master_addr",
+                "127.0.0.1",
+                "--master_port",
+                "55237",
+                "${file}",
+                "/data/cheyujie/github_fork/LLaMA-Factory/examples/train_lora/llama3_lora_ppo_debug.yaml"
+            ],
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "4,5"
+            }
+        },
+        {
             "name": "kto",
             "type": "debugpy",
             "request": "launch",

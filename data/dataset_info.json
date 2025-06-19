@@ -11,6 +11,9 @@
   "sft_demo": {
     "file_name": "sft_demo.json"
   },
+  "ppo_demo": {
+    "file_name": "ppo_demo.json"
+  },
   "alpaca_en_demo": {
     "file_name": "alpaca_en_demo.json"
   },

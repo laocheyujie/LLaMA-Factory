@@ -1,0 +1,46 @@
+### model
+model_name_or_path: /data/cheyujie/code/all_in_one/models/huggingface/Qwen/Qwen3-0.6B
+reward_model: http://localhost:8018/reward
+trust_remote_code: true
+
+### finetuning
+stage: ppo
+do_train: true
+finetuning_type: lora
+lora_rank: 8
+lora_alpha: 16
+lora_target: all
+reward_model_type: api
+
+### dataset
+dataset: ppo_demo
+dataset_dir: /data/cheyujie/github_fork/LLaMA-Factory/data
+template: qwen3
+cutoff_len: 32768
+overwrite_cache: true
+preprocessing_num_workers: 16
+dataloader_num_workers: 4
+enable_thinking: false
+
+### output
+output_dir: saves/qwen3/lora/ppo
+logging_steps: 1
+save_steps: 100
+plot_loss: true
+overwrite_output_dir: true
+report_to: tensorboard  # choices: [none, wandb, tensorboard, swanlab, mlflow]
+
+### train
+per_device_train_batch_size: 2
+gradient_accumulation_steps: 4
+learning_rate: 1.0e-5
+num_train_epochs: 3.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+bf16: true
+ddp_timeout: 180000000
+
+### generate
+max_new_tokens: 12800
+top_k: 0
+top_p: 0.9

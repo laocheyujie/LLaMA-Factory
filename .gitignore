@@ -163,7 +163,7 @@ cython_debug/
 # .vscode/
 
 # uv
-uv.lock
+# uv.lock
 
 # custom .gitignore
 hf_cache/

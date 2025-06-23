@@ -1,8 +1,29 @@
+## 环境
+- GPTQ int8 量化：`pip install auto_gptq optimum`
+- AWQ int4 量化：`pip install autoawq`
+
+
 ## 整体流程
 ### cli.py
 根据不同命调用不同的函数，如果是 train 且 gpu > 1，则通过子进程用 trochrun 开始分布式训练
 torchrun 启动的是 launcher 脚本，launcher 又调用乐 train.tuner.run_exp()
 
+
+## 关键组件
+- 配置管理: `src/llmtuner/train/tuner.py`以及各个方法的`workflow.py`
+- 数据处理: `src/llmtuner/data/`
+    - Dataset: `Alpaca`, `ShareGPT`的格式转换
+    - Prompt Template: `template.py` 对不同类型的模型应用不同的模板
+    - DataCollator: `DataCollatorForSeq2Seq`或自定义的`DataCollator`
+- 模型加载与 PEFT Adapter: `src/llmtuner/model/loader.py`
+    - Model: 使用`AutoModelForCausalLM`等方法加载模型
+    - PEFT: 使用`peft.get_peft_model`动态注入 LoRA, QLoRA 等适配器，并与`bitsandbytes`集成量化
+    - Patching: 应用`FlashAttention`等优化
+- 训练器: `xxx_trainer.py`
+    - Trainer
+    - PEFT 模型保存/加载
+    - 分布式训练: DeepSpeed, DDP/FSDP 等
+    
 
 ## 源码中的重点
 - `dataset_attr.num_samples`: 单个数据集样本的数量（少了就随机采样扩充，多了就随机丢弃）

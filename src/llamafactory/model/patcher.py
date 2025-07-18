@@ -60,7 +60,8 @@ def patch_tokenizer(tokenizer: "PreTrainedTokenizer", model_args: "ModelArgument
         # NOTE: 将 PreTrainedTokenizerBase 中的 _pad 方法绑定到当前的 tokenizer 实例上
         tokenizer._pad = MethodType(PreTrainedTokenizerBase._pad, tokenizer)
 
-    if model_args.model_max_length is not None and tokenizer.model_max_length < model_args.model_max_length:
+    # if model_args.model_max_length is not None and tokenizer.model_max_length < model_args.model_max_length:
+    if model_args.model_max_length is not None and tokenizer.model_max_length != model_args.model_max_length:
         tokenizer.model_max_length = model_args.model_max_length  # enlarge the tokenizer max length
 
     if model_args.add_tokens is not None:

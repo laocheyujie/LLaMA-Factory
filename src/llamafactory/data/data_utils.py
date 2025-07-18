@@ -147,6 +147,30 @@ def get_dataset_module(dataset: Union["Dataset", "DatasetDict"]) -> "DatasetModu
     return dataset_module
 
 
+# SP NOTE: modified from https://github.com/jzhang38/EasyContext/
+def preprocess_sp_dataset(seq_ids, world_size, sequence_parallel_mode):
+    # seq_ids = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    # world_size = 4
+    if sequence_parallel_mode == 'zigzag-ring':
+        step = len(seq_ids) // (2 * world_size)
+        # step = 2
+        value_chunks = [seq_ids[s : s + step] for s in range(0, len(seq_ids), step)]
+        # value_chunks = [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10, 11], [12, 13], [14, 15]]
+        local_values = list()
+        for rank in range(world_size):
+            local_values.append(value_chunks[rank] + value_chunks[2 * world_size - rank - 1])
+        # local_values = [[0, 1, 14, 15], [2, 3, 12, 13], [4, 5, 10, 11], [6, 7, 8, 9]]
+        return local_values
+    elif sequence_parallel_mode == "ulysses":
+        step = len(seq_ids) // world_size
+        # step = 4
+        local_values = [seq_ids[s : s + step] for s in range(0, len(seq_ids), step)]
+        # local_values = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]]
+        return local_values
+    else:
+        raise NotImplementedError('Other sequence parallel modes are to be implemented.')
+    
+
 def setup_fs(path: str, anon: bool = False) -> "fsspec.AbstractFileSystem":
     r"""Set up a filesystem object based on the path protocol."""
     storage_options = {"anon": anon} if anon else {}

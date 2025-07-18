@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import re
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Tuple, Union
 
@@ -52,6 +53,8 @@ class Template:
     replace_eos: bool
     replace_jinja_template: bool
     mm_plugin: "BasePlugin"
+    thought_words: tuple[str, str]
+    enable_thinking: bool = False
 
     def encode_oneturn(
         self,
@@ -63,7 +66,8 @@ class Template:
         r"""
         Returns a single pair of token ids representing prompt and response respectively.
         """
-        encoded_messages = self._encode(tokenizer, messages, system, tools, remove_thought=True)
+        # encoded_messages = self._encode(tokenizer, messages, system, tools, remove_thought=True)
+        encoded_messages = self._encode(tokenizer, messages, system, tools)
         prompt_ids = []
         for encoded_ids in encoded_messages[:-1]:
             prompt_ids += encoded_ids
@@ -81,7 +85,8 @@ class Template:
         r"""
         Returns multiple pairs of token ids representing prompts and responses respectively.
         """
-        encoded_messages = self._encode(tokenizer, messages, system, tools, remove_thought=False)
+        # encoded_messages = self._encode(tokenizer, messages, system, tools, remove_thought=False)
+        encoded_messages = self._encode(tokenizer, messages, system, tools)
         return [(encoded_messages[i], encoded_messages[i + 1]) for i in range(0, len(encoded_messages), 2)]
 
     def extract_tool(self, content: str) -> Union[str, List[Tuple[str, str]]]:
@@ -90,10 +95,18 @@ class Template:
         """
         return self.format_tools.extract(content)
 
-    def _remove_thought(self, content: str) -> str:
-         r"""Remove thought from assistant message."""
-         pattern = re.compile(f"{re.escape(self.thought_words[0])}(.*?){re.escape(self.thought_words[1])}", re.DOTALL)
-         return re.sub(pattern, "", content).lstrip("\n")
+    def add_thought(self, content: str = "") -> str:
+        r"""Add empty thought to assistant message."""
+        return f"{self.thought_words[0]}\n\n{self.thought_words[1]}\n\n" + content
+
+    def remove_thought(self, content: str) -> str:
+        r"""Remove thought from assistant message."""
+        pattern = re.compile(f"{re.escape(self.thought_words[0])}(.*?){re.escape(self.thought_words[1])}", re.DOTALL)
+        return re.sub(pattern, "", content).lstrip("\n")
+    
+    def get_thought_word_ids(self, tokenizer: "PreTrainedTokenizer") -> list[int]:
+        r"""Get the token ids of thought words."""
+        return tokenizer.encode(self.add_thought(), add_special_tokens=False)
 
     def _encode(
         self,
@@ -101,7 +114,6 @@ class Template:
         messages: Sequence[Dict[str, str]],
         system: Optional[str],
         tools: Optional[str],
-        remove_thought: bool,
     ) -> List[List[int]]:
         r"""
         Encodes formatted inputs to pairs of token ids.
@@ -119,20 +131,18 @@ class Template:
                     tool_text = self.format_tools.apply(content=tools)[0] if tools else ""
                     elements += self.format_system.apply(content=(system + tool_text))
 
-            if i > 0 and i % 2 == 0:
-                elements += self.format_separator.apply()
-            
-            content = message["content"]
-            if remove_thought and message["role"] == Role.ASSISTANT and (i != len(messages) - 1):
-                 content = self._remove_thought(content)
             if message["role"] == Role.USER:
-                elements += self.format_user.apply(content=content, idx=str(i // 2))
+                # elements += self.format_user.apply(content=content, idx=str(i // 2))
+                elements += self.format_user.apply(content=message["content"], idx=str(i // 2))
             elif message["role"] == Role.ASSISTANT:
-                elements += self.format_assistant.apply(content=content)
+                # elements += self.format_assistant.apply(content=content)
+                elements += self.format_assistant.apply(content=message["content"])
             elif message["role"] == Role.OBSERVATION:
-                elements += self.format_observation.apply(content=content)
+                # elements += self.format_observation.apply(content=content)
+                elements += self.format_observation.apply(content=message["content"])
             elif message["role"] == Role.FUNCTION:
-                elements += self.format_function.apply(content=content)
+                # elements += self.format_function.apply(content=content)
+                elements += self.format_function.apply(content=message["content"])
             else:
                 raise NotImplementedError("Unexpected role: {}".format(message["role"]))
 
@@ -163,6 +173,64 @@ class Template:
 
 
 @dataclass
+class ReasoningTemplate(Template):
+    r"""A template that add thought to assistant message."""
+
+    @override
+    def encode_oneturn(
+        self,
+        tokenizer: "PreTrainedTokenizer",
+        messages: list[dict[str, str]],
+        system: Optional[str] = None,
+        tools: Optional[str] = None,
+    ) -> tuple[list[int], list[int]]:
+        messages = deepcopy(messages)
+        for i in range(1, len(messages) - 2, 2):
+            messages[i]["content"] = self.remove_thought(messages[i]["content"])
+
+        if self.enable_thinking is False:  # remove all cot
+            messages[-1]["content"] = self.remove_thought(messages[-1]["content"])
+
+        prompt_ids, response_ids = super().encode_oneturn(tokenizer, messages, system, tools)
+        if (
+            self.thought_words[0] not in messages[-1]["content"]
+            and self.thought_words[1] not in messages[-1]["content"]
+        ):  # add empty cot
+            if not self.enable_thinking:  # do not compute loss
+                prompt_ids += self.get_thought_word_ids(tokenizer)
+            else:  # do compute loss
+                response_ids = self.get_thought_word_ids(tokenizer) + response_ids
+
+        return prompt_ids, response_ids
+
+    @override
+    def encode_multiturn(
+        self,
+        tokenizer: "PreTrainedTokenizer",
+        messages: list[dict[str, str]],
+        system: Optional[str] = None,
+        tools: Optional[str] = None,
+    ) -> list[tuple[list[int], list[int]]]:
+        messages = deepcopy(messages)
+        if self.enable_thinking is False:  # remove all cot
+            for i in range(1, len(messages), 2):
+                messages[i]["content"] = self.remove_thought(messages[i]["content"])
+
+        encoded_messages = self._encode(tokenizer, messages, system, tools)
+        for i in range(0, len(messages), 2):
+            if (
+                self.thought_words[0] not in messages[i + 1]["content"]
+                and self.thought_words[1] not in messages[i + 1]["content"]
+            ):  # add empty cot
+                if not self.enable_thinking:  # do not compute loss
+                    encoded_messages[i] += self.get_thought_word_ids(tokenizer)
+                else:  # do compute loss
+                    encoded_messages[i + 1] = self.get_thought_word_ids(tokenizer) + encoded_messages[i + 1]
+
+        return [(encoded_messages[i], encoded_messages[i + 1]) for i in range(0, len(encoded_messages), 2)]
+
+
+@dataclass
 class Llama2Template(Template):
     @override
     def _encode(
@@ -171,7 +239,6 @@ class Llama2Template(Template):
         messages: Sequence[Dict[str, str]],
         system: str,
         tools: str,
-        remove_thought: bool,
     ) -> List[List[int]]:
         r"""
         Encodes formatted inputs to pairs of token ids.
@@ -190,21 +257,18 @@ class Llama2Template(Template):
                     tool_text = self.format_tools.apply(content=tools)[0] if tools else ""
                     system_text = self.format_system.apply(content=(system + tool_text))[0]
 
-            if i > 0 and i % 2 == 0:
-                elements += self.format_separator.apply()
-
-            content = message["content"]
-            if remove_thought and message["role"] == Role.ASSISTANT and (i != len(messages) - 1):
-                content = self._remove_thought(content)
-
             if message["role"] == Role.USER:
-                elements += self.format_user.apply(content=system_text + content)
+                # elements += self.format_user.apply(content=system_text + content)
+                elements += self.format_user.apply(content=system_text + message["content"])
             elif message["role"] == Role.ASSISTANT:
-                elements += self.format_assistant.apply(content=content)
+                # elements += self.format_assistant.apply(content=content)
+                elements += self.format_assistant.apply(content=message["content"])
             elif message["role"] == Role.OBSERVATION:
-                elements += self.format_observation.apply(content=content)
+                # elements += self.format_observation.apply(content=content)
+                elements += self.format_observation.apply(content=message["content"])
             elif message["role"] == Role.FUNCTION:
-                elements += self.format_function.apply(content=content)
+                # elements += self.format_function.apply(content=content)
+                elements += self.format_function.apply(content=message["content"])
             else:
                 raise NotImplementedError("Unexpected role: {}".format(message["role"]))
 
@@ -232,6 +296,9 @@ def _register_template(
     replace_eos: bool = False,
     replace_jinja_template: bool = True,
     mm_plugin: "BasePlugin" = get_mm_plugin(name="base"),
+    thought_words: Optional[tuple[str, str]] = None,
+    enable_thinking: bool = False,
+    template_class: "type[Template]" = Template,
 ) -> None:
     r"""
     Registers a chat template.
@@ -261,7 +328,7 @@ def _register_template(
     """
     eos_slots = [] if efficient_eos else [{"eos_token"}]
     default_slots = ["{{content}}"] if efficient_eos else ["{{content}}", {"eos_token"}]
-    template_class = Llama2Template if name.startswith("llama2") else Template
+    # template_class = Llama2Template if name.startswith("llama2") else Template
     default_user_formatter = StringFormatter(slots=["{{content}}"])
     default_assistant_formatter = StringFormatter(slots=["{{content}}"] + eos_slots)
     default_function_formatter = FunctionFormatter(slots=default_slots, tool_format="default")
@@ -283,6 +350,8 @@ def _register_template(
         replace_eos=replace_eos,
         replace_jinja_template=replace_jinja_template,
         mm_plugin=mm_plugin,
+        thought_words=thought_words or ("<think>", "</think>"),
+        enable_thinking=enable_thinking,
     )
 
 
@@ -419,7 +488,8 @@ def get_template_and_fix_tokenizer(tokenizer: "PreTrainedTokenizer", data_args: 
             tokenizer.chat_template = _get_jinja_template(template, tokenizer)
         except ValueError as e:
             logger.info_rank0(f"Cannot add this chat template to tokenizer: {e}.")
-
+            
+    template.enable_thinking = data_args.enable_thinking or False
     return template
 
 
@@ -1058,17 +1128,19 @@ _register_template(
 )
 
 _register_template(
-     name="qwen3",
-     format_user=StringFormatter(slots=["<|im_start|>user\n{{content}}<|im_end|>\n<|im_start|>assistant\n"]),
-     format_assistant=StringFormatter(slots=["{{content}}<|im_end|>\n"]),
-     format_system=StringFormatter(slots=["<|im_start|>system\n{{content}}<|im_end|>\n"]),
-     format_function=FunctionFormatter(slots=["{{content}}<|im_end|>\n"], tool_format="qwen"),
-     format_observation=StringFormatter(
-         slots=["<|im_start|>user\n<tool_response>\n{{content}}\n</tool_response><|im_end|>\n<|im_start|>assistant\n"]
-     ),
-     format_tools=ToolFormatter(tool_format="qwen"),
-     stop_words=["<|im_end|>"],
- )
+    name="qwen3",
+    format_user=StringFormatter(slots=["<|im_start|>user\n{{content}}<|im_end|>\n<|im_start|>assistant\n"]),
+    format_assistant=StringFormatter(slots=["{{content}}<|im_end|>\n"]),
+    format_system=StringFormatter(slots=["<|im_start|>system\n{{content}}<|im_end|>\n"]),
+    format_function=FunctionFormatter(slots=["{{content}}<|im_end|>\n"], tool_format="qwen"),
+    format_observation=StringFormatter(
+        slots=["<|im_start|>user\n<tool_response>\n{{content}}\n</tool_response><|im_end|>\n<|im_start|>assistant\n"]
+    ),
+    format_tools=ToolFormatter(tool_format="qwen"),
+    stop_words=["<|im_end|>"],
+    replace_eos=True,
+    template_class=ReasoningTemplate,
+)
 
 
 _register_template(

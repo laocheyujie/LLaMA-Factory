@@ -127,6 +127,10 @@ class DataArguments:
         default=None,
         metadata={"help": "Tool format to use for constructing function calling examples."},
     )
+    enable_thinking: Optional[bool] = field(
+        default=False,
+        metadata={"help": "Whether or not to enable thinking mode for reasoning models."},
+    )
     tokenized_path: Optional[str] = field(
         default=None,
         metadata={

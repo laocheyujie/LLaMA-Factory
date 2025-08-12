@@ -1,4 +1,12 @@
 {
+  "function_call": {
+    "file_name": "function_call.json",
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "conversations",
+      "tools": "tools"
+    }
+  },
   "identity": {
     "file_name": "identity.json"
   },

@@ -2,6 +2,32 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "tools",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/data/cheyujie/github_fork/LLaMA-Factory/.venv/bin/torchrun",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "--nnodes",
+                "1",
+                "--node_rank",
+                "0",
+                "--nproc-per-node",
+                "2",
+                "--master_addr",
+                "127.0.0.1",
+                "--master_port",
+                "55237",
+                "${file}",
+                "/data/cheyujie/github_fork/LLaMA-Factory/examples/train_lora/qwen3_lora_tools_debug.yaml"
+            ],
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0,1",
+                "DISABLE_VERSION_CHECK": "1"
+            }
+        },
+        {
             "name": "pt",
             "type": "debugpy",
             "request": "launch",

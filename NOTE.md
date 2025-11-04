@@ -14,9 +14,18 @@
 
 ```bash
 docker pull hiyouga/llamafactory:latest
-docker run -itd -v ./LLaMA-Factory:/app -v ./models:/models  --name llamafactory --gpus=all --ipc=host hiyouga/llamafactory:latest /bin/bash
+
+docker run -itd --gpus=all --ipc=host \
+    -p 7860:7860 \
+    -p 8000:8000 \
+    -v ./models:/root/.cache/huggingface \
+    -v ./datasets:/app/shared_data \
+    -v ./finetune:/app/output \
+    --name llamafactory-latest \
+    hiyouga/llamafactory:latest
 ```
 
+额外安装（可选）
 ```bash
 # 安装基础工具
 apt install -y zsh
@@ -48,6 +57,97 @@ pip install tensorboard nvitop yunchang
 ```bash
 # 训练
 llamafactory-cli train /app/examples/train_lora/qwen3_lora_sft_ds2.yaml
+```
+
+## 数据格式
+```json
+[
+  {
+    "instruction": "hi",
+    "input": "",
+    "output": "Hello! I am {{name}}, an AI assistant developed by {{author}}. How can I assist you today?"
+  },
+  {
+    "instruction": "hello",
+    "input": "",
+    "output": "Hello! I am {{name}}, an AI assistant developed by {{author}}. How can I assist you today?"
+  }
+]
+```
+可以加上 `system`
+
+
+## 配置
+```yaml
+### model
+model_name_or_path: /root/.cache/huggingface/Qwen/Qwen3-32B
+trust_remote_code: true
+
+### method
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.0
+lora_target: all
+deepspeed: examples/deepspeed/ds_z2_config.json  # choices: [ds_z0_config.json, ds_z2_config.json, ds_z3_config.json]
+
+### dataset
+dataset: xxx
+template: qwen3
+cutoff_len: 8192
+max_samples: 1000000
+overwrite_cache: true
+preprocessing_num_workers: 16
+dataloader_num_workers: 8
+
+### output
+output_dir: saves/Qwen3-32B/lora/sft
+logging_steps: 5
+save_steps: 100
+plot_loss: true
+overwrite_output_dir: true
+save_only_model: false
+report_to: swanlab  # choices: [none, wandb, tensorboard, swanlab, mlflow]
+
+### train
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 4
+flash_attn: fa2
+optim: adamw_torch
+learning_rate: 1.0e-4
+num_train_epochs: 3.0
+lr_scheduler_type: cosine
+max_grad_norm: 1.0
+warmup_ratio: 0.1
+bf16: true
+ddp_timeout: 180000000
+resume_from_checkpoint: null
+
+### eval
+val_size: 0.01
+per_device_eval_batch_size: 1
+eval_strategy: steps
+eval_steps: 50
+
+### report
+use_swanlab: true
+run_name: xxx
+swanlab_run_name: xxx
+```
+
+
+## 单机训练
+
+```bash
+export SWANLAB_API_KEY=xxx
+
+# DeepSpeed
+FORCE_TORCHRUN=1 llamafactory-cli train examples/xxx.yaml
+
+# DDP
+FORCE_TORCHRUN=1 CUDA_VISIBLE_DEVICES=0,1 llamafactory-cli train examples/xxx.yaml
 ```
 
 

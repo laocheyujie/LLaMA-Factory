@@ -10,6 +10,16 @@
 5. 设置 DeepSpeed ZeRO-3 MoE 配置: 去 `src/llamafactory/model/model_utils/moe.py` 里 `_set_z3_leaf_modules` 为新增模型的 transformers 模型架构
 
 
+## 整体流程
+1. docker pull image
+2. docker run & mount volumns
+3. 准备数据 & 写入 `dataset_info.json`
+4. 编辑训练配置 `examples/train_lora/xxx.yaml`
+5. 训练 `llamafactory-cli train examples/train_lora/xxx.yaml`
+6. 合并 LoRA `llamafactory-cli export examples/merge_lora/llama3_lora_sft.yaml`
+7. 部署 (sglnag/vllm)
+
+
 ## Docker 安装
 
 ```bash
@@ -20,7 +30,7 @@ docker run -itd --gpus=all --ipc=host \
     -p 8000:8000 \
     -v ./models:/root/.cache/huggingface \
     -v ./datasets:/app/shared_data \
-    -v ./finetune:/app/output \
+    -v ./output:/app/output \
     --name llamafactory-latest \
     hiyouga/llamafactory:latest
 ```
@@ -326,6 +336,8 @@ src/train.py examples/train_lora/glm_z1_lora_pretrain_gf.yaml
 
 ## 部署
 ### LoRA 合并
+`adapter_name_or_path` 写到 `checkpoint-xxx` 的上一层即可，会自动读取最后的 `checkpoint`，如果需要指定 checkpoint，可以定位到具体的 checkpoint 或者把需要的 checkpoint 变成最后的 checkpoint
+
 ```bash
 llamafactory-cli export examples/merge_lora/llama3_lora_sft.yaml
 ```

@@ -1,0 +1,57 @@
+### model
+model_name_or_path: /root/.cache/huggingface/Qwen/Qwen3-32B
+trust_remote_code: true
+
+### method
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 32
+lora_alpha: 64
+lora_dropout: 0.0
+lora_target: all
+deepspeed: examples/deepspeed/ds_z3_config.json  # choices: [ds_z0_config.json, ds_z2_config.json, ds_z3_config.json]
+
+### dataset
+dataset: pseudo-pretrain,general-sft,self-cognition
+template: qwen3
+cutoff_len: 16384
+max_samples: 1000000
+overwrite_cache: true
+preprocessing_num_workers: 16
+dataloader_num_workers: 8
+
+### output
+output_dir: saves/Qwen3-32B/lora/xxx
+logging_steps: 5
+save_steps: 200
+plot_loss: true
+overwrite_output_dir: true
+save_only_model: false
+report_to: swanlab  # choices: [none, wandb, tensorboard, swanlab, mlflow]
+
+### train
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 4
+flash_attn: fa2
+optim: adamw_torch
+learning_rate: 1.0e-4
+num_train_epochs: 2
+lr_scheduler_type: cosine
+max_grad_norm: 1.0
+warmup_ratio: 0.05
+bf16: true
+ddp_timeout: 180000000
+resume_from_checkpoint: null
+
+### eval
+# eval_dataset: xxx
+val_size: 0.01
+per_device_eval_batch_size: 1
+eval_strategy: steps
+eval_steps: 20
+
+### report
+use_swanlab: true
+run_name: xxx
+swanlab_run_name: xxx
